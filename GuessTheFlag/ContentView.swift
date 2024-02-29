@@ -22,6 +22,9 @@ struct ContentView: View {
     @State private var round = 0
     @State private var endOfGmae = false
     
+    @State private var flagAngle = [0.0, 0.0, 0.0]
+    @State private var flagOpacity = [1.0, 1.0, 1.0]
+    
     var body: some View {
         
         ZStack {
@@ -29,7 +32,7 @@ struct ContentView: View {
                 .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
                 .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3)
             ], center: .top, startRadius: 200, endRadius: 700)
-                .ignoresSafeArea()
+            .ignoresSafeArea()
             
             VStack {
                 Spacer()
@@ -52,12 +55,27 @@ struct ContentView: View {
                     ForEach(0..<3) { number in
                         Button {
                             flagTapped(number)
+                            withAnimation(.easeInOut(duration: 1)) {
+                                flagAngle[number] = 360
+                            }
+                            for i in 0..<3 {
+                                if i != number {
+                                    flagOpacity[i] = 0.25
+                                }
+                            }
                         } label: {
                             Image(countries[number])
                                 .renderingMode(.original)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 .shadow(radius: 5)
                         }
+                        .opacity(flagOpacity[number])
+                        .animation(.easeInOut(duration: 1), value: flagOpacity)
+                        .rotation3DEffect(
+                            .degrees(flagAngle[number]),
+                            axis: (x: 0.0, y: 1.0, z: 0.0),
+                            perspective: 0.7
+                        )
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -92,6 +110,8 @@ struct ContentView: View {
                 round = 0
                 countries.shuffle()
                 correctAnswer = Int.random(in: 0...2)
+                flagAngle = [0.0, 0.0, 0.0]
+                flagOpacity = [1.0, 1.0, 1.0]
             }
         } message: {
             Text("You guessed \(totalScore) \(totalScore == 1 ? "flag" : "flags") correctly out of \(totalNumberOfRounds).")
@@ -119,6 +139,8 @@ struct ContentView: View {
             countries.shuffle()
             correctAnswer = Int.random(in: 0...2)
         }
+        flagAngle = [0.0, 0.0, 0.0]
+        flagOpacity = [1.0, 1.0, 1.0]
     }
     
 }
